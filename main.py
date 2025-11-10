@@ -2,9 +2,10 @@ import moderngl
 import moderngl_window as mglw
 from pyrr import Matrix44
 import numpy as np
+from rendered_object import RenderedObject
 from rotation import RotationHandler
-from constants import *
-
+from render_util import *
+from spacetime import RenderedSpacetime
 class Camera:
     def __init__(self, eye=(0,0,5), target=(0,0,0), up=(0,1,0)):
         self.pos = np.array(eye, dtype='f4')
@@ -20,64 +21,6 @@ class Camera:
     def projection_matrix(self, rot_handler, aspect):
         return rot_handler.perspective(45.0, aspect, 0.1, 100.0)
     
-class RenderedObject:
-    def __init__(self, ctx, input_vertices, prog=None, position=(0,0,0), camera=None, uniforms = {}, rot_handler=None, rot_intensity=1):
-        self.input_vertices = input_vertices   
-
-        self.position = np.array(position, dtype='f4')#position saved as a nparray to keep the rowmajor matricse 
-
-        self.camera = camera
-
-        self.vertex_buff_obj=None#passing the points to tgpu 
-        #i like to think of it like passing to the stack in assembly
-        self.vertex_arr_obj=None#recieveing output
-
-        self.uniforms = uniforms #uniforms saved in dict for checking values for less cost
-        self.ctx = ctx
-        self.prog = prog #shader program
-
-        self.rot_handler = rot_handler
-        if not rot_handler:
-            self.rot_handler=RotationHandler()
-
-        self.rot_intensity = rot_intensity
-
-        if not prog:#setup shader program
-            self.prog = self.ctx.program(
-            vertex_shader=default_vertex(),
-            fragment_shader=default_fragment()
-        )
-
-        self.mvp = self.prog['mvp'] #save uniform handle
-    def set_uniform(self, key, val):
-        self.uniforms[key] = val
-        if key in self.prog:
-            self.prog[key].value = val
-
-    def load(self): 
-        self.vertex_buff_obj = self.ctx.buffer(self.input_vertices.astype('f4').tobytes())
-        self.vertex_arr_obj = self.ctx.vertex_array(self.prog, [(self.vertex_buff_obj, '3f', 'in_vert')])
-    
-    def update(self, t):
-        rotation = self.rot_handler.rotation_y(t * self.rot_intensity)
-        translation = np.eye(4, dtype='f4')
-        translation[:3, 3] = self.position
-        model = rotation @ translation
-        return model
-    def set_position(self,pos=(0,0,0)):
-        self.position = np.array(pos, dtype='f4')
-    def render(self, time, aspect):
-        model = self.update(time)
-        view = self.camera.view_matrix(self.rot_handler)
-        projection = self.camera.projection_matrix(self.rot_handler, aspect)
-        mvp = projection @ view @ model
-
-        self.mvp.write(mvp.T.astype('f4').tobytes())
-
-        if 'iTime' in self.prog:
-            self.prog['iTime'].value = time
-
-        self.vertex_arr_obj.render()
 
 class Renderer(mglw.WindowConfig):
     gl_version = (3,3)
@@ -118,18 +61,23 @@ class Renderer(mglw.WindowConfig):
         ) 
 
         self.rendered_objects = [
-            RenderedObject(ctx=self.ctx, input_vertices=sphere_verts(), prog=p_fire, position=(-1,0,0), camera=self.camera, rot_handler=self.rot, rot_intensity=2),
-            RenderedObject(ctx=self.ctx, input_vertices=cube_verts(), prog=p_cool, position=(1,0,0), camera=self.camera, rot_handler=self.rot, rot_intensity=2)
+            RenderedSpacetime(ctx=self.ctx, size=10, blocks=30, camera=self.camera, rot_handler=self.rot),
+            RenderedObject(ctx=self.ctx, input_vertices=cube_verts(), prog=p_cool, position=(0,0,0), camera=self.camera, rot_handler=self.rot, rot_intensity=0)
         ]
         self.rendered_objects[0].set_uniform("time", 0.0)
         
         for i in self.rendered_objects:
             i.load()
 
-    
+    def test_orbit(self, time, r=5.0, s=0.3, y=2.0):
+        x=np.sin(time * s) * r 
+        z=np.cos(time * s) * r
+        self.camera.set_position((x, y, z))
     def on_render(self, time, frame_time):
-        self.ctx.clear(0.45, 0., 0.7, 1.0)
+        self.ctx.clear(0., 0., 0., 1.0)
         #self.camera.set_position((0,0,5+np.sin(time))) js a test for cam movement
+
+        self.test_orbit(time)
 
         aspect = self.wnd.aspect_ratio
         for i in range(len(self.rendered_objects)):
