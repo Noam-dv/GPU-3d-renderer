@@ -1,8 +1,54 @@
 import numpy as np
-#thanks chatgpt 
+import moderngl 
+def default_vertex(): #wavy shader test
+    return '''
+    #version 330
+    in vec3 in_vert;
 
+    uniform mat4 mvp;
+    uniform float time;
+    out vec3 in_vert_out;
+
+    void main() {
+        float wave = sin(in_vert.x * 2.0 + time * 1.2) * 0.1 +
+                     cos(in_vert.y * 3.0 + time * 0.8) * 0.1;
+
+        vec3 displaced = in_vert + vec3(0.0, wave, 0.0);
+        gl_Position = mvp * vec4(displaced, 1.0);
+        in_vert_out = displaced;
+    }
+    '''
+
+def default_fragment():
+    return '''
+            #version 330
+
+            out vec4 fragColor;
+            in vec4 gl_FragCoord;
+
+            uniform float iTime;
+
+            float hash(vec2 p) {
+                return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+            }
+
+            float noise(vec2 p) {
+                vec2 i = floor(p);
+                vec2 f = fract(p);
+                vec2 u = f * f * (3.0 - 2.0 * f);
+                return mix(
+                    mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
+                    mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x),
+                    u.y
+                );
+            }
+            void main() {
+                vec2 uv = gl_FragCoord.xy / vec2(800.0, 600.0);
+                fragColor = vec4(uv, 1.0, 1.0);
+            }
+            '''
 def cube_verts():
-    # cube centered at origin triangles
+    # cube centered at origin triangles (thanks chatgpt)
     v = [
         -1,-1, 1,  1,-1, 1,  1, 1, 1,
         -1,-1, 1,  1, 1, 1, -1, 1, 1,
