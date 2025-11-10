@@ -39,13 +39,35 @@ class Renderer(mglw.WindowConfig):
                 }
             ''',
             fragment_shader='''
-                #version 330
-                out vec4 fragColor;
-                void main() {
-                    fragColor = vec4(0.5, 0.5, 1.0, 1.0);
-                }
+            #version 330
+
+            out vec4 fragColor;
+            in vec4 gl_FragCoord;
+
+            uniform float iTime;
+
+            float hash(vec2 p) {
+                return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+            }
+
+            float noise(vec2 p) {
+                vec2 i = floor(p);
+                vec2 f = fract(p);
+                vec2 u = f * f * (3.0 - 2.0 * f);
+                return mix(
+                    mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
+                    mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x),
+                    u.y
+                );
+            }
+            void main() {
+                vec2 uv = gl_FragCoord.xy / vec2(800.0, 600.0);
+                fragColor = vec4(uv, 1.0, 1.0);
+            }
             '''
+
         )
+        self.time_uniform = self.prog.get('iTime', None)
 
         self.mvp = self.prog['mvp'] #get uniform handle
 
@@ -53,9 +75,11 @@ class Renderer(mglw.WindowConfig):
     
     def on_render(self, time, frame_time):
         self.ctx.clear(0, 0, 0, 1.0)
-                
+        if self.time_uniform:
+            self.time_uniform.value = time
+
         model = self.rot.rotation_y(time)
-        eye = (0,0,5) #cam pos
+        eye = (0,np.sin(time) * 2,5) #cam pos
         target = (0,0,0) #where cam should be pointed
         up = (0,1,0) #which way is up
         #used to determine cam angle
