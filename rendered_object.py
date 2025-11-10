@@ -3,6 +3,7 @@ import moderngl_window as mglw
 from pyrr import Matrix44
 import numpy as np
 from rotation import RotationHandler
+from render_util import default_fragment, default_vertex
 
 class RenderedObject:
     def __init__(self, ctx, input_vertices, prog=None, position=(0,0,0), camera=None, uniforms = {}, rot_handler=None, rot_intensity=1):
@@ -40,8 +41,15 @@ class RenderedObject:
 
     def load(self): 
         self.vertex_buff_obj = self.ctx.buffer(self.input_vertices.astype('f4').tobytes())
-        self.vertex_arr_obj = self.ctx.vertex_array(self.prog, [(self.vertex_buff_obj, '3f', 'in_vert')])
-    
+        self.vertex_arr_obj = self.ctx.vertex_array(
+            self.prog, [(self.vertex_buff_obj, '3f', 'in_vert')] # will be addign an in normal vector so shaders can work differently based on sides
+            #rn the frag shader works on each pixel without knowing which way the sphere faces
+            #and that issue can cause basically that every pixel that is reused th next frame for the sphere@
+            #will generte the same output so the same color
+            #so the spheres will look like 2dcircles that arent rotating
+            #i hope that makes sense 
+        )
+            
     def update(self, t):
         rotation = self.rot_handler.rotation_y(t * self.rot_intensity)
         translation = np.eye(4, dtype='f4')

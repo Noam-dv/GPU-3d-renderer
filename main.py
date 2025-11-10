@@ -44,7 +44,7 @@ class Renderer(mglw.WindowConfig):
         self.camera = Camera(eye=(0,2,5),target=(0,0,0),up=(0,1,0))
 
         self.raw_shader=""
-        with open("stolen shadertoy shader 1.frag", "r") as s:
+        with open("./shaders/stolen shadertoy shader 1.frag", "r") as s:
             raw_shader=s.read()
 
         p_fire = self.ctx.program(
@@ -52,7 +52,7 @@ class Renderer(mglw.WindowConfig):
             fragment_shader=raw_shader 
         )
 
-        with open("stolen shadertoy shader 2.frag", "r") as s:
+        with open("./shaders/stolen shadertoy shader 2.frag", "r") as s:
             raw_shader=s.read()
 
         p_cool = self.ctx.program(
@@ -62,7 +62,7 @@ class Renderer(mglw.WindowConfig):
 
         self.rendered_objects = [
             RenderedSpacetime(ctx=self.ctx, size=10, blocks=30, camera=self.camera, rot_handler=self.rot),
-            RenderedObject(ctx=self.ctx, input_vertices=cube_verts(), prog=p_cool, position=(0,0,0), camera=self.camera, rot_handler=self.rot, rot_intensity=0)
+            RenderedObject(ctx=self.ctx, input_vertices=cube_verts(), prog=p_fire, position=(0,0,0), camera=self.camera, rot_handler=self.rot, rot_intensity=0)
         ]
         self.rendered_objects[0].set_uniform("time", 0.0)
         

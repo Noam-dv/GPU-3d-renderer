@@ -150,7 +150,7 @@ void main() {
     float xpart = fragCoord.x/resolution.x;
     float ypart = fragCoord.y/resolution.y;
     //
-    float clip = 210.0;
+    float clip = 900.0;
     float ypartClip = fragCoord.y/clip;
     float ypartClippedFalloff = clamp(2.0-ypartClip,0.0,1.0);
     float ypartClipped = min(ypartClip,1.0);
