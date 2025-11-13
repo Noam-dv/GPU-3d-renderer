@@ -1,7 +1,7 @@
 import numpy as np
 import moderngl
 from renderer.rendered_object import RenderedObject
-from render_util import *
+#from render_util import *
 from spacetime import RenderedSpacetime
 
 class Scene:

@@ -1,8 +1,8 @@
 import moderngl
 import moderngl_window as mglw
 import numpy as np
-from rotation import RotationHandler
-from render_util import default_fragment, default_vertex
+from util.rotation import RotationHandler
+from util.render_util import default_fragment, default_vertex
 
 class RenderedObject:
     def __init__(self, ctx, input_vertices, prog=None, position=(0,0,0), camera=None, uniforms = {}, rot_handler=None, rot_intensity=1):

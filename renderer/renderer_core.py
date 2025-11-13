@@ -1,8 +1,8 @@
 import numpy as np
 import moderngl
-from rotation import RotationHandler
-from render_util import *
-from camera import Camera
+from util.rotation import RotationHandler
+from util.render_util import *
+from renderer.camera import Camera
 
 from scenes.scene import Scene#scene types
 from scenes.stest import STest

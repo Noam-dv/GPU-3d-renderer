@@ -2,7 +2,7 @@ from scenes.scene import Scene
 import numpy as np
 import moderngl
 from renderer.rendered_object import RenderedObject
-from render_util import *
+from util.render_util import *
 from spacetime import RenderedSpacetime
 
 class STest(Scene):
