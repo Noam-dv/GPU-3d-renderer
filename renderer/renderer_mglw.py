@@ -1,5 +1,5 @@
 import moderngl_window as mglw
-from renderer_core import RendererCore
+from renderer.renderer_core import RendererCore
 #this is the renderer if werre using a modernglwindow 
 #wrote this just for organization
 class RendererMGLW(mglw.WindowConfig):
@@ -12,6 +12,6 @@ class RendererMGLW(mglw.WindowConfig):
         super().__init__(**kwargs)
         self.core = RendererCore(self.ctx)
 
-    def render(self, time, frame_time=0.0):
+    def on_render(self, time, frame_time=0.0):
         aspect = self.wnd.aspect_ratio
         self.core.render(time, aspect)
