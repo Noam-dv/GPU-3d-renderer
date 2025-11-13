@@ -1,5 +1,5 @@
 import numpy as np
-from rendered_object import RenderedObject
+from renderer.rendered_object import RenderedObject
 from render_util import centered_flatgrid,default_vertex,default_fragment
 import moderngl 
 

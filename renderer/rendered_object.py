@@ -1,6 +1,5 @@
 import moderngl
 import moderngl_window as mglw
-from pyrr import Matrix44
 import numpy as np
 from rotation import RotationHandler
 from render_util import default_fragment, default_vertex
