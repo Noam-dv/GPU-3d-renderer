@@ -2,7 +2,7 @@ import numpy as np
 import moderngl
 from renderer.rendered_object import RenderedObject
 #from render_util import *
-from spacetime import RenderedSpacetime
+from objects.spacetime import RenderedSpacetime
 
 class Scene:
     #scene has a list of objects

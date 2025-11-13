@@ -3,7 +3,7 @@ import numpy as np
 import moderngl
 from renderer.rendered_object import RenderedObject
 from util.render_util import *
-from spacetime import RenderedSpacetime
+from objects.spacetime import RenderedSpacetime
 
 class STest(Scene):
     #this is the originla scene moved out of renderer core and instead put here for organization
