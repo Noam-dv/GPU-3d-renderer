@@ -8,6 +8,7 @@ this project is a **custom GPU 3d renderer** written in Python built as a playgr
 - realtime graphics
 - shader experiments
 - scene/engine layout
+- very simple and customizable oop layout 
 
 ![end goal](gif.gif)  
 
