@@ -20,27 +20,20 @@ class STest(Scene):
         #   . 
         #wait i did that triangle drawing perfectly tahats crazy
 
-        self.raw_shader=""
-        with open("./shaders/stolen shadertoy shader 1.frag", "r") as s:
-            raw_shader=s.read()
-
         p_fire = ctx.program(
             vertex_shader = default_vertex(), #ported shader from here https://www.shadertoy.com/view/MlKSWm
-            fragment_shader=raw_shader 
+            fragment_shader=get_frag("stolen shadertoy shader 1") 
         )
-
-        with open("./shaders/stolen shadertoy shader 2.frag", "r") as s:
-            raw_shader=s.read()
 
         p_cool = ctx.program(
             vertex_shader = default_vertex(), #ported shader from here https://www.shadertoy.com/view/MlKSWm
-            fragment_shader=raw_shader 
+            fragment_shader=get_frag("stolen shadertoy shader 2") 
         ) 
 
         spacetime = RenderedSpacetime(ctx=ctx, size=10, blocks=30, camera=camera, rot_handler=rot_handler)
         spacetime.set_uniform("time", 0.0) #initialize incase it has
         
-        cube = RenderedObject(ctx=ctx, input_vertices=cube_verts(), prog=p_fire, position=(0,0,0), camera=camera, rot_handler=rot_handler, rot_intensity=0)
+        cube = RenderedObject(ctx=ctx, input_vertices=cube_verts(), prog=p_cool, position=(0,0,0), camera=camera, rot_handler=rot_handler, rot_intensity=0)
 
         self.objects = [ #these will all be rendered
             spacetime,

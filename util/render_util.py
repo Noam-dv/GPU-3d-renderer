@@ -1,6 +1,18 @@
 import numpy as np
 import moderngl 
 
+def get_frag(src):
+    r=""
+    with open("./shaders/frag/" + src + ".frag", "r") as s:
+        r=s.read()
+    return r
+
+def get_vert(src):
+    r=""
+    with open("./shaders/vert/" + src + ".vert", "r") as s:
+        r=s.read()
+    return r
+
 def centered_flatgrid(s=10, b=50):#CORRECTED GRID LINE CODE!!!! 
     verts = []
     step = s/b #size divided by how many blocks we want
