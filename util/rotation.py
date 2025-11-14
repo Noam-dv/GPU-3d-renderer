@@ -1,10 +1,10 @@
 import numpy as np
-
+from util.render_util import nprint
 class RotationHandler():
     #math helper functions, all are common functions for 3d rendering, none of the logic is actually made by me
 
     def __init__(self):
-        print("rotation handler initialized")
+        nprint("rotation handler initialized")
     
     @staticmethod 
     def rotation_y(t): #rotation matrix for y

@@ -1,5 +1,38 @@
 import numpy as np
 import moderngl 
+import inspect
+#this is lowk just general util not just render util
+
+
+#------------------------------------------------------------------------------
+#general util
+#------------------------------------------------------------------------------
+
+def nprint(*args, **kwargs):  
+    #help from https://stackoverflow.com/questions/17065086/how-to-get-the-caller-class-name-inside-a-function-of-another-class-in-python
+    #costier print functoin that shows line + class name
+    #only for debugging
+
+    f = inspect.currentframe().f_back#gets callers frame 
+    #thats bascialy just wherer nprint was called
+    ln = f.f_lineno #line number
+
+    #getting class name 
+    
+    if 'self' in f.f_locals:#instance
+        classname = f.f_locals['self'].__class__.__name__
+
+    elif 'cls' in f.f_locals:#class
+        classname = f.f_locals['cls'].__name__
+
+    else:#not in class for example main or smth
+        classname = f.f_globals.get('__name__', '<module>')
+
+    print(f"[{classname}]:[{ln}]:", *args, **kwargs)
+
+#------------------------------------------------------------------------------
+#functions to do with shaders
+#------------------------------------------------------------------------------
 
 def get_frag(src):
     r=""
@@ -12,6 +45,17 @@ def get_vert(src):
     with open("./shaders/vert/" + src + ".vert", "r") as s:
         r=s.read()
     return r
+
+def default_vertex():
+    return get_vert("!")
+
+def default_fragment():
+    return get_frag("!")
+
+
+#------------------------------------------------------------------------------
+#functions to do with vertices
+#------------------------------------------------------------------------------
 
 def centered_flatgrid(s=10, b=50):#CORRECTED GRID LINE CODE!!!! 
     verts = []
@@ -60,35 +104,46 @@ def centered_flatgrid(s=10, b=50):#CORRECTED GRID LINE CODE!!!!
 #             verts += [x0,0,z0,  x1,0,z1,  x0,0,z1]
 #     return np.array(verts,dtype=np.float32)
 
-def default_vertex(): #wavy shader test
-    return '''
-        #version 330
 
-        in vec3 in_vert; 
-        uniform mat4 mvp; 
-        out vec3 v_pos;
+def add_normals(verts): #calculating normal is essential for lighting
+    #https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/geometry-of-a-triangle.html#:~:text=The%20normal%20of%20the%20triangle,in%20a%20counter%2Dclockwise%20manner.
+    #basically this function takes a flat array of positions [x,y,z,x,y,z] as triangles
+    #it calculates the normal vector for each triangle 
+    #and inserts the nromal vec after each point in those trangles in the arr
+    verts = np.array(verts, dtype='f4')
 
-        void main() {
-            gl_Position = mvp * vec4(in_vert, 1.0);
-            v_pos = in_vert;
-        }
+    # each triangle is 9 floats: 3 vertices * 3 coords
+    if verts.size % 9 == 0:
+        nprint("vertex arr must be a mult of 9 (9 verts is 1 triangle)")
 
-    '''
+    o = []
 
-def default_fragment():
-    return '''
-            #version 330
+    #go over each triangle
+    #step of 9
+    for i in range(0, len(verts), 9):
+        p0 = verts[i:i+3]#3 verts of the triangle
+        p1 = verts[i+3:i+6]
+        p2 = verts[i+6:i+9]
+        e1 = p1 - p0 #cross product to get normal vec
+        e2 = p2 - p0
+        n = np.cross(e1, e2)
 
+        #how far from 0,0,0 is the strength of the vector
+        #the angle it make sis the direction
+        #we get the normal and divide ny length
+        l = np.linalg.norm(n) #we want to preserve the angle but not the strengh of the vector
+        #so we divide by the length
+        if l != 0:
+            n = n / l
 
-            in vec3 v_pos;
-            out vec4 fragColor;
+        # make new arr with the position and the normal for each vertex
 
-            void main() {
-                vec3 color = 0.5 + 0.5 * normalize(v_pos);
-                fragColor = vec4(color, 1.0);
-            }
+        out.extend(list(p0) + list(n))
+        out.extend(list(p1) + list(n))
+        out.extend(list(p2) + list(n))
 
-            '''
+    return np.array(out, dtype='f4')
+
 def cube_verts():
     # cube centered at origin triangles (thanks chatgpt)
     v = [
