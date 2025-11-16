@@ -180,7 +180,7 @@ def cube_verts():
     return np.array(v, dtype=np.float32)
 
 
-def sphere_verts(radius=1.0, segments=320, rings=160):
+def sphere_verts(radius=1.0, segments=170, rings=80):
     #returns a flat array so we can add normals to it
     verts = []
 
