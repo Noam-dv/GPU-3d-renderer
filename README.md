@@ -10,7 +10,8 @@ this project is a **custom GPU 3d renderer** written in Python built as a playgr
 - scene/engine layout
 - very simple and customizable oop layout 
 
-![end goal](gif.gif)  
+![](gif2.gif)  
+![](gif.gif)  
 
 The longterm goal is to turn this into a **physically inspired black hole simulation** using **raytracing / raymarching**, including:
 

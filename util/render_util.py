@@ -1,6 +1,7 @@
 import numpy as np
 import moderngl 
 import inspect
+import os
 #this is lowk just general util not just render util
 
 
@@ -33,6 +34,22 @@ def nprint(*args, **kwargs):
 #------------------------------------------------------------------------------
 #functions to do with shaders
 #------------------------------------------------------------------------------
+
+def list_vert_shaders():
+    #returns list of vertex shader names without .vert
+    l = []
+    for f in os.listdir("./shaders/vert"):
+        if f.endswith(".vert"):
+            l.append(os.path.splitext(f)[0])
+    return sorted(l)
+
+def list_frag_shaders():
+    #same as last
+    l = []
+    for f in os.listdir("./shaders/frag"):
+        if f.endswith(".frag"):
+            l.append(os.path.splitext(f)[0])
+    return sorted(l)
 
 def get_frag(src):
     r=""
@@ -138,11 +155,11 @@ def add_normals(verts): #calculating normal is essential for lighting
 
         # make new arr with the position and the normal for each vertex
 
-        out.extend(list(p0) + list(n))
-        out.extend(list(p1) + list(n))
-        out.extend(list(p2) + list(n))
+        o.extend(list(p0) + list(n))
+        o.extend(list(p1) + list(n))
+        o.extend(list(p2) + list(n))
 
-    return np.array(out, dtype='f4')
+    return np.array(o, dtype='f4')
 
 def cube_verts():
     # cube centered at origin triangles (thanks chatgpt)
@@ -163,16 +180,18 @@ def cube_verts():
     return np.array(v, dtype=np.float32)
 
 
-def sphere_verts(radius=1.0, segments=32, rings=16):
-    vertices = []
+def sphere_verts(radius=1.0, segments=320, rings=160):
+    #returns a flat array so we can add normals to it
+    verts = []
+
     for i in range(rings):
         lat0 = np.pi * (-0.5 + float(i) / rings)
         lat1 = np.pi * (-0.5 + float(i + 1) / rings)
 
-        y0 = np.sin(lat0)
-        y1 = np.sin(lat1)
-        r0 = np.cos(lat0)
-        r1 = np.cos(lat1)
+        y0 = np.sin(lat0) * radius
+        y1 = np.sin(lat1) * radius
+        r0 = np.cos(lat0) * radius
+        r1 = np.cos(lat1) * radius
 
         for j in range(segments):
             lon0 = 2 * np.pi * float(j) / segments
@@ -183,13 +202,18 @@ def sphere_verts(radius=1.0, segments=32, rings=16):
             x1 = np.cos(lon1)
             z1 = np.sin(lon1)
 
-            vertices.extend([
-                [r1 * x1 * radius, y1 * radius, r1 * z1 * radius],
-                [r0 * x1 * radius, y0 * radius, r0 * z1 * radius],
-                [r0 * x0 * radius, y0 * radius, r0 * z0 * radius],
-
-                [r1 * x1 * radius, y1 * radius, r1 * z1 * radius],
-                [r0 * x0 * radius, y0 * radius, r0 * z0 * radius],
-                [r1 * x0 * radius, y1 * radius, r1 * z0 * radius],
+            #triangle 1
+            verts.extend([
+                r1 * x1, y1, r1 * z1,
+                r0 * x1, y0, r0 * z1,
+                r0 * x0, y0, r0 * z0,
             ])
-    return np.array(vertices, dtype=np.float32)
+
+            #triangle 2
+            verts.extend([
+                r1 * x1, y1, r1 * z1,
+                r0 * x0, y0, r0 * z0,
+                r1 * x0, y1, r1 * z0,
+            ])
+
+    return np.array(verts, dtype='f4')

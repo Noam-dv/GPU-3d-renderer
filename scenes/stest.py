@@ -4,6 +4,7 @@ import moderngl
 from renderer.rendered_object import RenderedObject
 from util.render_util import *
 from objects.spacetime import RenderedSpacetime
+from objects.lit_object import LitRenderedObject
 
 class STest(Scene):
     #this is the originla scene moved out of renderer core and instead put here for organization
@@ -33,7 +34,7 @@ class STest(Scene):
         spacetime = RenderedSpacetime(ctx=ctx, size=10, blocks=30, camera=camera, rot_handler=rot_handler)
         spacetime.set_uniform("time", 0.0) #initialize incase it has
         
-        cube = RenderedObject(ctx=ctx, input_vertices=cube_verts(), prog=p_cool, position=(0,0,0), camera=camera, rot_handler=rot_handler, rot_intensity=0)
+        cube = LitRenderedObject(ctx=ctx, input_vertices=sphere_verts(), prog=None, position=(0,0,0), camera=camera, rot_handler=rot_handler, rot_intensity=0)
 
         self.objects = [ #these will all be rendered
             spacetime,

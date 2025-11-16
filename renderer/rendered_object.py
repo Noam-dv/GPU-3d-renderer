@@ -55,10 +55,39 @@ class RenderedObject:
         translation[:3, 3] = self.position
         model = translation @ rotation
         return model
+
+    def reshade(self, vsrc=None, fsrc=None):
+        #rebuilds the shader program and vao
+        #keeps the same vertex data
+        if vsrc is None:
+            vsrc = default_vertex()
+        if fsrc is None:
+            fsrc = default_fragment()
+
+        #make new shader program
+        self.prog = self.ctx.program(
+            vertex_shader=vsrc,
+            fragment_shader=fsrc
+        )
+
+        #get new mvp uniform handle
+        self.mvp = self.prog['mvp']
+
+        #re-apply saved uniforms if they still exist in the new shader
+        for key, val in self.uniforms.items():
+            if key in self.prog:
+                self.prog[key].value = val
+
+        #rebuild vao with the same vbo
+        if self.vertex_buff_obj is not None:
+            self.vertex_arr_obj = self.ctx.vertex_array(
+                self.prog, [(self.vertex_buff_obj, '3f', 'in_vert')]
+            )
+
     def set_position(self,pos=(0,0,0)):
         self.position = np.array(pos, dtype='f4')
+
     def render(self, time, aspect):
-        
         model = self.update(time)
         view = self.camera.view_matrix(self.rot_handler)
         projection = self.camera.projection_matrix(self.rot_handler, aspect)

@@ -22,6 +22,7 @@ class RendererCore:
         #ever object
         #so if u move it and shit itll still render correctly
         self.load_scene(self.scene)
+        self.ctx.enable(moderngl.DEPTH_TEST)
 
     def load_scene(self, scene: Scene):
         #store scene and grab its objects
