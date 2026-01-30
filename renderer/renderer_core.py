@@ -8,19 +8,25 @@ from scenes.scene import Scene#scene types
 from scenes.stest import STest
 
 class RendererCore:
-    #windowconfig is removed so pygame can use this renderrer too 
+    """renderer core that is used by both moderngl and pygame windows"""
     def __init__(self, ctx: moderngl.Context):
         self.ctx = ctx
 
         self.rot = RotationHandler()
         self.camera = Camera(eye=(0,2,5),target=(0,0,0),up=(0,1,0))
 
-        self.scene = STest(self.ctx, self.camera, self.rot)#holds the current scene loaded 
+        self.scene = STest(self.ctx, self.camera, self.rot)
+        
+        #holds the current scene loaded 
         #stole this idea from unity and other game engines
-        self.objects = []#list of objects
-        #basically the way it works is scene will define a list of objects and ill keep a list of pointers to 
-        #ever object
-        #so if u move it and shit itll still render correctly
+        
+        self.objects = []        
+        """
+        basically the way it works is scene will define a list of objects and ill keep a list 
+        of pointers to every object
+        so if u move it and shit itll still render correctly
+        """
+        
         self.load_scene(self.scene)
         self.ctx.enable(moderngl.DEPTH_TEST)
 
