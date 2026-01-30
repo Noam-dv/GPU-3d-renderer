@@ -4,39 +4,42 @@ import inspect
 import os
 #this is lowk just general util not just render util
 
-
-#------------------------------------------------------------------------------
-#general util
-#------------------------------------------------------------------------------
+""" 
+general utility functions 
+i shouldve thought of a better way to categorize these
+"""
 
 def nprint(*args, **kwargs):  
-    #help from https://stackoverflow.com/questions/17065086/how-to-get-the-caller-class-name-inside-a-function-of-another-class-in-python
-    #costier print functoin that shows line + class name
-    #only for debugging
-
-    f = inspect.currentframe().f_back#gets callers frame 
-    #thats bascialy just wherer nprint was called
+    """
+    help from https://stackoverflow.com/questions/17065086/how-to-get-the-caller-class-name-inside-a-function-of-another-class-in-python
+    costier print functoin that shows line + class name
+    only for debugging cuz its very costy
+    """
+    
+    f = inspect.currentframe().f_back
+    #gets callers frame 
     ln = f.f_lineno #line number
 
     #getting class name 
     
-    if 'self' in f.f_locals:#instance
+    if 'self' in f.f_locals: #instance
         classname = f.f_locals['self'].__class__.__name__
 
-    elif 'cls' in f.f_locals:#class
+    elif 'cls' in f.f_locals: #class
         classname = f.f_locals['cls'].__name__
 
-    else:#not in class for example main or smth
+    else: #not in class for example main or smth
         classname = f.f_globals.get('__name__', '<module>')
 
     print(f"[{classname}]:[{ln}]:", *args, **kwargs)
+    
 
-#------------------------------------------------------------------------------
-#functions to do with shaders
-#------------------------------------------------------------------------------
+"""
+Shader functions ---------------------------------------
+"""
 
 def list_vert_shaders():
-    #returns list of vertex shader names without .vert
+    """ returns list of vert shaders from folder """
     l = []
     for f in os.listdir("./shaders/vert"):
         if f.endswith(".vert"):
@@ -44,7 +47,7 @@ def list_vert_shaders():
     return sorted(l)
 
 def list_frag_shaders():
-    #same as last
+    """ lists frag shaders from folder """
     l = []
     for f in os.listdir("./shaders/frag"):
         if f.endswith(".frag"):
@@ -52,12 +55,14 @@ def list_frag_shaders():
     return sorted(l)
 
 def get_frag(src):
+    """read from frag folder"""
     r=""
     with open("./shaders/frag/" + src + ".frag", "r") as s:
         r=s.read()
     return r
 
 def get_vert(src):
+    """read from vert folder"""
     r=""
     with open("./shaders/vert/" + src + ".vert", "r") as s:
         r=s.read()
@@ -70,18 +75,21 @@ def default_fragment():
     return get_frag("!")
 
 
-#------------------------------------------------------------------------------
-#functions to do with vertices
-#------------------------------------------------------------------------------
+"""
+vertex helpers ---------------------------------------------------------
+"""
 
-def centered_flatgrid(s=10, b=50):#CORRECTED GRID LINE CODE!!!! 
+def centered_flatgrid(s=10, b=50): #CORRECTED GRID LINE CODE!!!! 
     verts = []
     step = s/b #size divided by how many blocks we want
 
     #vertical lines
     for i in range(b + 1):
-        #-size/2 ------- 0.0 --------size/2--------- size 
-        #-size/2 basically js centers everything proportiortinlaly how do u even spell that word 
+        """
+        -size/2 ------- 0.0 --------size/2--------- size 
+        -size/2 basically js centers everything proportiortinlaly how do u even spell that word 
+        """
+        
         x = -s/2 + i * step
         verts += [x, 0, -s/2,  x, 0, s/2]
 
@@ -123,10 +131,13 @@ def centered_flatgrid(s=10, b=50):#CORRECTED GRID LINE CODE!!!!
 
 
 def add_normals(verts): #calculating normal is essential for lighting
-    #https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/geometry-of-a-triangle.html#:~:text=The%20normal%20of%20the%20triangle,in%20a%20counter%2Dclockwise%20manner.
-    #basically this function takes a flat array of positions [x,y,z,x,y,z] as triangles
-    #it calculates the normal vector for each triangle 
-    #and inserts the nromal vec after each point in those trangles in the arr
+    """
+    https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/geometry-of-a-triangle.html#:~:text=The%20normal%20of%20the%20triangle,in%20a%20counter%2Dclockwise%20manner.
+    basically this function takes a flat array of positions [x,y,z,x,y,z] as triangles
+    it calculates the normal vector for each triangle 
+    and inserts the nromal vec after each point in those trangles in the arr
+    """
+    
     verts = np.array(verts, dtype='f4')
 
     # each triangle is 9 floats: 3 vertices * 3 coords
@@ -148,7 +159,10 @@ def add_normals(verts): #calculating normal is essential for lighting
         #how far from 0,0,0 is the strength of the vector
         #the angle it make sis the direction
         #we get the normal and divide ny length
-        l = np.linalg.norm(n) #we want to preserve the angle but not the strengh of the vector
+        
+        l = np.linalg.norm(n) 
+        
+        #we want to preserve the angle but not the strengh of the vector
         #so we divide by the length
         if l != 0:
             n = n / l
