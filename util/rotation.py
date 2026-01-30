@@ -1,7 +1,7 @@
 import numpy as np
 from util.render_util import nprint
 class RotationHandler():
-    #math helper functions, all are common functions for 3d rendering, none of the logic is actually made by me
+    """math helper functions, all are common formulas for 3d rendering"""
 
     def __init__(self):
         nprint("rotation handler initialized")
@@ -27,7 +27,7 @@ class RotationHandler():
         f = f / np.linalg.norm(f)
         r = np.cross(f, up) #find right direction
         r = r / np.linalg.norm(r)
-        u = np.cross(r, f)#find up direction to determine angle
+        u = np.cross(r, f) #find up direction to determine angle
 
         mat = np.eye(4, dtype=np.float32)
         mat[0, :3] = r
@@ -38,7 +38,7 @@ class RotationHandler():
 
     @staticmethod
     def perspective(fov_deg, aspect, near, far): #converts 3d points into 2d projected screen positions based on depth
-        f = 1.0 / np.tan(np.radians(fov_deg) / 2.0)#i dont understand this one at all so i cant leave comments
+        f = 1.0 / np.tan(np.radians(fov_deg) / 2.0)
         P = np.zeros((4, 4), dtype=np.float32)
         P[0, 0] = f / aspect
         P[1, 1] = f
