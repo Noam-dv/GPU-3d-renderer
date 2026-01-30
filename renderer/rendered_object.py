@@ -5,16 +5,16 @@ from util.rotation import RotationHandler
 from util.render_util import default_fragment, default_vertex
 
 class RenderedObject:
+    """represents a single object being rendered in 3d space and contains modifiable position frag and vert shaders etc"""
     def __init__(self, ctx, input_vertices, prog=None, position=(0,0,0), camera=None, uniforms = {}, rot_handler=None, rot_intensity=1):
         self.input_vertices = input_vertices   
-
-        self.position = np.array(position, dtype='f4')#position saved as a nparray to keep the rowmajor matricse 
-
+        self.position = np.array(position, dtype='f4') #position saved as a nparray to keep the rowmajor matricse 
         self.camera = camera
-
-        self.vertex_buff_obj=None#passing the points to tgpu 
+        
+        #passing the points to tgpu 
         #i like to think of it like passing to the stack in assembly
-        self.vertex_arr_obj=None#recieveing output
+        self.vertex_buff_obj=None
+        self.vertex_arr_obj=None #recieveing output
 
         self.uniforms = uniforms #uniforms saved in dict for checking values for less cost
         self.ctx = ctx
@@ -26,14 +26,17 @@ class RenderedObject:
 
         self.rot_intensity = rot_intensity
 
-        if not prog:#setup shader program
+        #setup shader program
+        if not prog:
             self.prog = self.ctx.program(
             vertex_shader=default_vertex(),
             fragment_shader=default_fragment()
         )
 
         self.mvp = self.prog['mvp'] #save uniform handle
+        
     def set_uniform(self, key, val):
+        """allow to set uniform on runtime"""
         self.uniforms[key] = val
         if key in self.prog:
             self.prog[key].value = val
@@ -41,15 +44,18 @@ class RenderedObject:
     def load(self): 
         self.vertex_buff_obj = self.ctx.buffer(self.input_vertices.astype('f4').tobytes())
         self.vertex_arr_obj = self.ctx.vertex_array(
-            self.prog, [(self.vertex_buff_obj, '3f', 'in_vert')] # will be addign an in normal vector so shaders can work differently based on sides
-            #rn the frag shader works on each pixel without knowing which way the sphere faces
-            #and that issue can cause basically that every pixel that is reused th next frame for the sphere@
-            #will generte the same output so the same color
-            #so the spheres will look like 2dcircles that arent rotating
-            #i hope that makes sense 
+            self.prog, [(self.vertex_buff_obj, '3f', 'in_vert')] # will be adding an in normal vector so shaders can work differently based on sides
+            """
+            rn the frag shader works on each pixel without knowing which way the sphere faces
+            and that issue can cause basically that every pixel that is reused th next frame for the sphere@
+            will generte the same output so the same color
+            so the spheres will look like 2dcircles that arent rotating
+            i hope that makes sense 
+            """
         )
             
     def update(self, t):
+        """https://www.youtube.com/watch?v=ftDb1cVcxN4"""
         rotation = self.rot_handler.rotation_y(t * self.rot_intensity)
         translation = np.eye(4, dtype='f4')
         translation[:3, 3] = self.position
@@ -57,20 +63,24 @@ class RenderedObject:
         return model
 
     def reshade(self, vsrc=None, fsrc=None):
-        #rebuilds the shader program and vao
-        #keeps the same vertex data
+        """
+        rebuilds the shader program and vao
+        keeps the same vertex data
+        """
         if vsrc is None:
             vsrc = default_vertex()
         if fsrc is None:
             fsrc = default_fragment()
 
         #make new shader program
+        
         self.prog = self.ctx.program(
             vertex_shader=vsrc,
             fragment_shader=fsrc
         )
 
         #get new mvp uniform handle
+        
         self.mvp = self.prog['mvp']
 
         #re-apply saved uniforms if they still exist in the new shader
