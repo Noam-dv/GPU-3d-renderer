@@ -4,9 +4,14 @@ import numpy as np
 from util.rotation import RotationHandler
 from renderer.rendered_object import RenderedObject
 from util.render_util import *
+
 class LitRenderedObject(RenderedObject):
-    #this class is practically the same as RenderedObject but it passes to the shader the normals
-    #needed for lighting
+    """ 
+    represents a single object
+    affected by lighting
+    (meaning it calculates normal vectors for every face and passes it to the basic lighting shader)
+    """
+    
     def __init__(self, ctx, input_vertices, prog=None, position=(0,0,0), camera=None, uniforms = {}, rot_handler=None, rot_intensity=1, auto_normals=True):
         if auto_normals:
             input_vertices = add_normals(input_vertices)
@@ -37,7 +42,9 @@ class LitRenderedObject(RenderedObject):
             self.prog, [ (self.vertex_buff_obj, '3f 3f', 'in_vert', 'in_norm') ] #pass normal vector to get face direction
         )
 
-    def render(self, time, aspect): #old rendering logic but pass all uniforms needed for lighting
+    def render(self, time, aspect): 
+        """old rendering logic but pass all uniforms needed for lighting"""
+        
         model = self.update(time)
         view = self.camera.view_matrix(self.rot_handler)
         projection = self.camera.projection_matrix(self.rot_handler, aspect)
@@ -54,16 +61,23 @@ class LitRenderedObject(RenderedObject):
             self.prog['camPos'].value = tuple(self.camera.pos.tolist())
 
         #model matrix
-        if 'modelmat' in self.prog: #we neeed the pass the model matrix to the shader so it can convert from the local space to world space
-        #what that means is basically if u check the code
-        #verts are computed as 1 0 -1 and numbers that dont actually tell us where they are based on our screen resolution 
-        #its object space
-        #we need to pass this and the normal mat to convert in_vert and in_norm to world space
+        if 'modelmat' in self.prog: 
+            """
+            we neeed the pass the model matrix to the shader so it can convert from the local space to world space
+            what that means is basically if u check the code
+            verts are computed as 1 0 -1 and numbers that dont actually tell us where they are based on our screen resolution 
+            its object space
+            we need to pass this and the normal mat to convert in_vert and in_norm to world space
+            """
             self.prog['modelmat'].write(model.T.astype('f4').tobytes())
 
-        if 'normmat' in self.prog: #normal matrix is used for transforming the in_norm to actual worldspace units insteadof -1 1 0 and shit like that
-        #also this is needed for once we trasnform scale and rotate models
-        #doesnt replace the in_norms it more like fixes it
+        if 'normmat' in self.prog: 
+            """
+            normal matrix is used for transforming the in_norm to actual worldspace units insteadof -1 1 0 and shit like that
+            also this is needed for once we trasnform scale and rotate models
+            doesnt replace the in_norms it more like fixes it
+            """
+            
             m3 = model[:3, :3]
             normal_mat = np.linalg.inv(m3).T
             self.prog['normmat'].write(normal_mat.astype('f4').tobytes())
